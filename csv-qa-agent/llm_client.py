@@ -18,7 +18,7 @@ load_dotenv()
 
 CODE_BLOCK_PATTERN = re.compile(r"```(?:python)?\s*\n(.*?)```", re.DOTALL | re.IGNORECASE)
 
-DEFAULT_GROQ_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct"
+DEFAULT_GROQ_MODEL = "openai/gpt-oss-20b"
 DEFAULT_ANTHROPIC_MODEL = "claude-sonnet-4-20250514"
 
 REQUEST_TIMEOUT = 30  # seconds

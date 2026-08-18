@@ -77,7 +77,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 
 | Provider | Default Model | Get a Key |
 |----------|--------------|-----------|
-| **Groq** (default) | `meta-llama/llama-4-scout-17b-16e-instruct` | [console.groq.com](https://console.groq.com/) |
+| **Groq** (default) | `openai/gpt-oss-20b` | [console.groq.com](https://console.groq.com/) |
 | **Anthropic** | `claude-sonnet-4-20250514` | [console.anthropic.com](https://console.anthropic.com/) |
 
 Groq is used automatically when `GROQ_API_KEY` is set. Set `LLM_PROVIDER=anthropic` to force Anthropic.
