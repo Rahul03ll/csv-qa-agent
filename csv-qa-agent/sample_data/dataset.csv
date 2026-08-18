@@ -1,0 +1,101 @@
+name,city,area,cuisine,restaurant_type,rating,cost_for_two,votes,online_order,book_table,cost_category,listed_date
+Biryani Blues,Hyderabad,Banjara Hills,Cafe,Dine-out,3.1,250,889,Yes,No,Budget,2024-07-14
+Curry House,Bangalore,Koramangala,Japanese,Takeaway,3.1,900,4647,Yes,No,Mid-range,2023-08-15
+Tandoor Express,Chennai,T. Nagar,Seafood,Café,4.2,1300,2326,Yes,No,Premium,2023-04-03
+Kebab King,Delhi,Saket,Hyderabadi,Takeaway,3.9,400,3813,Yes,No,Budget,2023-03-18
+Dosa Corner,Mumbai,Powai,Korean,Delivery,4.6,1450,4779,Yes,Yes,Premium,2023-10-03
+Filter Coffee Co,Kolkata,Park Street,Bengali,Café,3.2,600,3038,Yes,Yes,Mid-range,2023-03-20
+Haleem Hub,Hyderabad,Begumpet,Thai,Delivery,2.9,1400,2261,No,No,Premium,2023-11-27
+Dragon Wok,Pune,Koregaon Park,Thai,Café,4.5,1250,3336,Yes,Yes,Premium,2023-07-21
+Sushi Zen,Delhi,Rajouri Garden,Mexican,Takeaway,2.8,550,2070,Yes,No,Mid-range,2024-07-13
+Pizza Palace,Delhi,Hauz Khas,BBQ,Delivery,3.7,1250,435,No,Yes,Premium,2024-02-20
+Burger Barn,Bangalore,Whitefield,Korean,Dine-out,4.9,1800,2109,No,No,Premium,2023-04-22
+Noodle Bar,Kolkata,New Town,Continental,Café,2.8,1500,1345,Yes,No,Premium,2024-05-25
+Taco Town,Bangalore,Koramangala,Street Food,Dine-out,4.5,300,1679,Yes,No,Budget,2023-11-16
+Ramen Room,Bangalore,HSR Layout,Street Food,Takeaway,3.1,200,4697,No,Yes,Budget,2023-03-25
+Thai Orchid,Chennai,Anna Nagar,Mughlai,Takeaway,4.1,1050,1402,Yes,No,Premium,2023-07-18
+Paneer Paradise,Pune,Kothrud,Japanese,Dine-out,4.2,2450,3109,Yes,No,Premium,2023-08-08
+Sambar Stories,Bangalore,Koramangala,Lebanese,Dine-out,3.8,1100,1854,Yes,No,Premium,2023-08-03
+Chai Adda,Kolkata,New Town,Chinese,Takeaway,3.7,650,4026,Yes,Yes,Mid-range,2023-08-26
+Paratha Point,Delhi,Chandni Chowk,Japanese,Dine-out,2.7,2550,2952,Yes,No,Premium,2023-04-02
+Wok This Way,Delhi,Saket,Italian,Café,3.1,900,4443,Yes,No,Mid-range,2024-03-08
+Momos Factory,Kolkata,Park Street,Mexican,Dine-out,4.4,950,852,Yes,No,Mid-range,2023-03-25
+Dal Tadka,Kolkata,Salt Lake,Rajasthani,Dine-out,3.7,600,3335,No,Yes,Mid-range,2024-01-09
+Idli Street,Jaipur,Vaishali Nagar,Street Food,Delivery,3.5,350,4602,Yes,No,Budget,2023-10-07
+Shawarma Station,Jaipur,Tonk Road,Desserts,Delivery,2.6,300,518,Yes,No,Budget,2023-02-17
+Pho Republic,Bangalore,Indiranagar,Chinese,Delivery,3.9,600,3357,Yes,No,Mid-range,2024-07-20
+Butter Story,Bangalore,Koramangala,Rajasthani,Café,4.1,1000,4332,Yes,Yes,Mid-range,2023-08-09
+Masala Box,Delhi,Rajouri Garden,Street Food,Dine-out,3.6,350,644,Yes,No,Budget,2023-03-18
+Rice Bowl,Mumbai,Colaba,Mughlai,Café,4.7,550,2051,Yes,Yes,Mid-range,2024-05-01
+Tikka Junction,Hyderabad,Begumpet,Street Food,Delivery,4.7,200,1150,Yes,No,Budget,2023-09-10
+Chaat Corner,Chennai,Besant Nagar,Continental,Dine-out,3.0,1900,2212,Yes,Yes,Premium,2023-03-21
+Spice Point,Delhi,Saket,South Indian,Takeaway,4.4,550,2195,Yes,No,Mid-range,2024-06-01
+Mint Kitchen,Bangalore,MG Road,Mughlai,Café,4.5,1100,4576,Yes,Yes,Premium,2023-12-26
+Green Café,Jaipur,MI Road,Hyderabadi,Delivery,4.1,700,4636,No,No,Mid-range,2023-08-28
+Spice Bistro,Bangalore,Indiranagar,Rajasthani,Delivery,4.3,750,3422,No,No,Mid-range,2023-09-06
+Royal Flavors,Pune,Koregaon Park,Bengali,Delivery,3.0,700,3820,Yes,No,Mid-range,2023-08-01
+Coastal House,Hyderabad,Gachibowli,Continental,Café,4.8,1150,2926,Yes,Yes,Premium,2023-01-04
+Olive Express,Kolkata,New Town,Seafood,Takeaway,2.6,1800,3609,Yes,No,Premium,2024-05-04
+Coastal Kitchen,Delhi,Karol Bagh,Japanese,Delivery,4.2,800,4309,No,No,Mid-range,2023-12-14
+Ginger Point,Bangalore,MG Road,Continental,Café,4.1,850,2510,Yes,No,Mid-range,2024-01-23
+Classic Table,Mumbai,Andheri,Japanese,Dine-out,4.1,1500,4712,Yes,No,Premium,2023-10-10
+Fresh Bites,Mumbai,Juhu,Korean,Delivery,3.6,2100,1800,Yes,No,Premium,2023-03-10
+Fresh House,Chennai,Besant Nagar,Korean,Delivery,4.5,2250,1974,Yes,Yes,Premium,2023-05-01
+Golden Bites,Bangalore,Whitefield,Korean,Takeaway,3.5,2000,4765,Yes,No,Premium,2024-01-08
+Silver Plate,Bangalore,MG Road,North Indian,Dine-out,3.0,1100,4293,Yes,No,Premium,2024-03-05
+Mint Stop,Pune,Kothrud,BBQ,Takeaway,3.3,1250,3675,Yes,No,Premium,2024-06-15
+Saffron Express,Kolkata,Ballygunge,American,Takeaway,4.3,950,4320,Yes,Yes,Mid-range,2023-03-23
+Fresh Lounge,Mumbai,Colaba,Continental,Delivery,2.7,900,1944,Yes,Yes,Mid-range,2023-03-14
+Classic Kitchen,Delhi,Karol Bagh,Mexican,Dine-out,3.0,850,3240,No,No,Mid-range,2024-07-13
+Little Plate,Delhi,Saket,Street Food,Takeaway,3.8,350,4523,No,No,Budget,2023-08-09
+Fresh Table,Delhi,Connaught Place,Bengali,Dine-out,4.2,750,3878,No,No,Mid-range,2024-01-19
+Classic Corner,Chennai,T. Nagar,Chinese,Takeaway,4.6,550,461,Yes,Yes,Mid-range,2023-11-11
+Classic Express,Pune,FC Road,Cafe,Café,4.5,450,208,Yes,Yes,Mid-range,2023-08-21
+Spice Café,Bangalore,MG Road,South Indian,Dine-out,3.0,200,1298,Yes,No,Budget,2024-07-07
+Blue Stop,Delhi,Saket,Hyderabadi,Dine-out,4.0,450,1391,No,Yes,Mid-range,2023-10-19
+Green House,Hyderabad,Gachibowli,Bengali,Dine-out,3.9,700,2039,Yes,No,Mid-range,2024-07-26
+Grand House,Bangalore,Jayanagar,Rajasthani,Dine-out,3.7,750,153,No,No,Mid-range,2024-02-12
+Classic Bistro,Hyderabad,Gachibowli,Mughlai,Takeaway,4.3,1150,2262,Yes,No,Premium,2024-03-14
+Fresh Café,Pune,Baner,Cafe,Takeaway,4.5,250,2334,No,Yes,Budget,2024-07-20
+Pepper Point,Hyderabad,Madhapur,North Indian,Café,2.9,600,2956,No,Yes,Mid-range,2024-06-01
+Urban Plate,Chennai,Anna Nagar,Chinese,Dine-out,3.7,600,3950,Yes,No,Mid-range,2023-03-10
+Rustic Junction,Mumbai,Powai,Thai,Café,3.4,1750,4399,Yes,No,Premium,2023-12-23
+Urban Palace,Delhi,Saket,Cafe,Delivery,4.2,350,1029,Yes,No,Budget,2023-07-07
+Basil Stop,Hyderabad,Madhapur,Lebanese,Café,3.2,600,1640,Yes,Yes,Mid-range,2023-01-23
+Royal Lounge,Chennai,Adyar,South Indian,Café,3.2,250,4071,Yes,Yes,Budget,2024-04-16
+Coastal Flavors,Delhi,Hauz Khas,South Indian,Dine-out,2.8,250,3332,Yes,No,Budget,2023-05-05
+Rustic Junction 8,Pune,Hinjawadi,Chinese,Takeaway,3.8,800,4933,No,Yes,Mid-range,2024-03-15
+Ginger Palace,Mumbai,Juhu,South Indian,Delivery,4.8,300,1778,Yes,Yes,Budget,2023-06-18
+Saffron Stop,Bangalore,Koramangala,Rajasthani,Takeaway,3.6,450,1946,Yes,Yes,Mid-range,2023-03-22
+Green Plate,Mumbai,Colaba,Lebanese,Dine-out,2.8,750,1270,No,No,Mid-range,2023-02-06
+Rustic Bites,Pune,Baner,Lebanese,Takeaway,2.8,1200,2541,Yes,No,Premium,2024-03-03
+Ginger Express,Chennai,Velachery,Continental,Café,2.6,1050,4762,Yes,Yes,Premium,2024-07-02
+Basil Bites,Pune,Viman Nagar,American,Dine-out,4.7,750,4845,Yes,No,Mid-range,2024-04-12
+Blue Point,Delhi,Saket,Italian,Dine-out,3.5,1500,2411,Yes,No,Premium,2024-03-03
+Little Delights,Mumbai,Colaba,Italian,Café,4.5,500,4494,Yes,Yes,Mid-range,2024-04-21
+Coastal Lounge,Delhi,Connaught Place,Japanese,Dine-out,2.8,2000,3639,No,No,Premium,2023-08-23
+Mint Plate,Bangalore,Jayanagar,North Indian,Delivery,2.7,500,3830,No,No,Mid-range,2024-04-23
+Classic Flavors,Mumbai,Powai,Cafe,Delivery,4.9,300,3791,Yes,Yes,Budget,2023-03-09
+Basil Express,Pune,FC Road,Continental,Takeaway,4.5,1200,2495,No,No,Premium,2023-05-15
+Mint Lounge,Chennai,Adyar,Continental,Takeaway,3.4,1250,1595,No,Yes,Premium,2023-08-28
+Pepper Table,Pune,Koregaon Park,Continental,Café,3.4,1950,1296,Yes,Yes,Premium,2023-04-28
+Saffron Garden,Kolkata,Park Street,BBQ,Café,4.2,900,1314,Yes,No,Mid-range,2023-11-20
+Rustic Café 3,Hyderabad,Secunderabad,Chinese,Dine-out,3.4,650,4047,No,Yes,Mid-range,2023-08-21
+Saffron Bistro,Delhi,Connaught Place,Italian,Café,4.2,550,426,Yes,Yes,Mid-range,2023-12-14
+Olive Bistro,Bangalore,Jayanagar,Rajasthani,Delivery,2.9,500,3183,Yes,Yes,Mid-range,2023-08-15
+Spice Bites,Hyderabad,Gachibowli,Cafe,Café,4.7,500,1344,Yes,No,Mid-range,2024-02-23
+Little Flavors,Mumbai,Colaba,Japanese,Café,2.8,2350,4735,Yes,Yes,Premium,2023-01-27
+Olive Kitchen,Hyderabad,Madhapur,North Indian,Delivery,4.7,1150,4119,No,No,Premium,2023-12-08
+Crystal Palace,Hyderabad,Begumpet,Cafe,Café,4.7,200,2580,No,Yes,Budget,2023-05-03
+Blue Grill,Kolkata,New Town,Rajasthani,Delivery,2.8,950,3047,Yes,No,Mid-range,2023-09-27
+Silver Bites,Jaipur,Malviya Nagar,Continental,Takeaway,4.8,900,1898,No,No,Mid-range,2024-06-12
+Urban Flavors 2,Bangalore,Whitefield,North Indian,Café,2.8,800,2197,Yes,No,Mid-range,2023-04-22
+Ginger Café,Chennai,Mylapore,Continental,Takeaway,4.1,1900,3853,No,Yes,Premium,2023-04-05
+Pepper Palace,Bangalore,Koramangala,Street Food,Takeaway,2.7,300,1161,Yes,Yes,Budget,2024-07-24
+Pepper Stop,Hyderabad,Gachibowli,Italian,Takeaway,3.5,1050,318,Yes,Yes,Premium,2023-08-28
+Mint Room,Delhi,Rajouri Garden,Hyderabadi,Takeaway,2.6,650,1604,No,No,Mid-range,2023-03-22
+Spice Kitchen,Mumbai,Powai,Korean,Delivery,4.4,1200,1081,No,Yes,Premium,2024-07-07
+Crystal Stop,Pune,Viman Nagar,Continental,Dine-out,2.5,900,1114,Yes,No,Mid-range,2023-01-05
+Fresh Garden,Bangalore,Indiranagar,Lebanese,Dine-out,2.9,550,1088,Yes,No,Mid-range,2024-04-15
+Spice Kitchen 9,Pune,Baner,Lebanese,Café,3.7,1450,405,Yes,No,Premium,2024-03-21
+Pepper Bites,Kolkata,Esplanade,Italian,Café,2.7,650,2688,Yes,Yes,Mid-range,2024-07-18
