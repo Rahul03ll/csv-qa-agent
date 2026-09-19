@@ -20,10 +20,26 @@ BLOCKED_MODULES = frozenset({
     "http", "urllib", "requests", "importlib", "ctypes",
     "signal", "multiprocessing", "pickle", "shelve", "builtins",
     "tempfile", "io", "pty", "posix", "nt", "webbrowser",
+    "ftplib", "smtplib", "telnetlib", "asyncio", "threading",
+    "inspect", "gc", "code", "codecs", "platform", "venv",
 })
 
 BLOCKED_FUNCTIONS = frozenset({
-    "open", "eval", "exec", "compile", "__import__",
+    "open", "eval", "exec", "compile", "__import__", "breakpoint", "exit", "quit", "input",
+})
+
+BLOCKED_NAMES = frozenset({
+    "open", "eval", "exec", "compile", "__import__", "breakpoint", "exit", "quit", "input",
+    "__builtins__",
+})
+
+BLOCKED_ATTRIBUTES = frozenset({
+    "__subclasses__", "__globals__", "__code__", "__closure__", "__bases__", "__mro__",
+    "__builtins__",
+    "to_csv", "to_excel", "to_parquet", "to_feather", "to_pickle", "to_sql",
+    "to_hdf", "to_stata", "to_clipboard", "to_xml",
+    "read_pickle", "read_csv", "read_excel", "read_sql", "read_table",
+    "read_parquet", "read_feather", "read_hdf",
 })
 
 EXECUTION_TIMEOUT = 10  # seconds
@@ -43,7 +59,7 @@ class ExecutionTimeoutError(CodeExecutionError):
 
 
 def _check_imports(code: str) -> None:
-    """Inspect AST for blocked import statements and dangerous builtin calls."""
+    """Inspect AST for blocked imports, dangerous builtins, attributes, and evasion patterns."""
     try:
         tree = ast.parse(code)
     except SyntaxError:
@@ -72,6 +88,25 @@ def _check_imports(code: str) -> None:
                     f"Blocked function call: '{node.func.id}()' is not allowed for security.",
                     code,
                 )
+        elif isinstance(node, ast.Name):
+            if node.id in BLOCKED_NAMES and node.id not in BLOCKED_FUNCTIONS:
+                raise CodeExecutionError(
+                    f"Blocked access to restricted name: '{node.id}' is not allowed for security.",
+                    code,
+                )
+        elif isinstance(node, ast.Attribute):
+            if node.attr in BLOCKED_ATTRIBUTES:
+                raise CodeExecutionError(
+                    f"Blocked attribute access: '.{node.attr}' is not allowed for security.",
+                    code,
+                )
+        elif isinstance(node, ast.Constant) and isinstance(node.value, str):
+            val = node.value
+            if val.startswith("__") and val.endswith("__"):
+                raise CodeExecutionError(
+                    f"Blocked dunder reference: '{val}' is not allowed for security.",
+                    code,
+                )
 
 
 def _format_result(result: Any) -> str:
@@ -85,13 +120,36 @@ def _format_result(result: Any) -> str:
     return str(result)
 
 
+def _safe_import(name: str, *args: Any, **kwargs: Any) -> Any:
+    """Restricted importer verifying module name against blocked list."""
+    root = name.split(".")[0]
+    if root in BLOCKED_MODULES:
+        raise CodeExecutionError(
+            f"Blocked import: '{name}' is not allowed for security.", ""
+        )
+    return __import__(name, *args, **kwargs)
+
+
+def _get_safe_builtins() -> dict[str, Any]:
+    """Construct a restricted __builtins__ dictionary without dangerous functions."""
+    import builtins
+    safe = {
+        k: getattr(builtins, k)
+        for k in dir(builtins)
+        if k not in BLOCKED_NAMES and not (k.startswith("__") and k.endswith("__"))
+    }
+    safe["__import__"] = _safe_import
+    return safe
+
+
 def _exec_with_timeout(code: str, namespace: dict, timeout: int) -> None:
-    """Run exec() in a thread with a timeout."""
+    """Run exec() in a thread with a timeout and restricted builtins."""
     exc_holder: list[BaseException] = []
+    safe_builtins = _get_safe_builtins()
 
     def _target():
         try:
-            exec(compile(code, "<generated>", "exec"), {"__builtins__": __builtins__}, namespace)
+            exec(compile(code, "<generated>", "exec"), {"__builtins__": safe_builtins}, namespace)
         except BaseException as exc:
             exc_holder.append(exc)
 
@@ -133,6 +191,7 @@ def execute_code(code: str, df: pd.DataFrame) -> tuple[Any, str]:
         import matplotlib
         matplotlib.use("Agg")  # non-interactive backend
         import matplotlib.pyplot as plt
+        plt.close("all")
         namespace["plt"] = plt
         namespace["matplotlib"] = matplotlib
     except ImportError:

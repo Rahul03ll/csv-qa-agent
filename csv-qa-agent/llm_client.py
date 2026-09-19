@@ -20,7 +20,7 @@ from prompts import RETRY_PROMPT, SYSTEM_PROMPT, build_user_message
 
 
 
-CODE_BLOCK_PATTERN = re.compile(r"```(?:python)?\s*\n(.*?)```", re.DOTALL | re.IGNORECASE)
+CODE_BLOCK_PATTERN = re.compile(r"```[a-zA-Z0-9_-]*\s*\n?(.*?)```", re.DOTALL)
 
 DEFAULT_GROQ_MODEL = "openai/gpt-oss-20b"
 DEFAULT_ANTHROPIC_MODEL = "claude-sonnet-4-20250514"
@@ -30,8 +30,13 @@ REQUEST_TIMEOUT = 30  # seconds
 
 def extract_code(response_text: str) -> str:
     """Extract Python code from a markdown fenced block or raw response."""
-    # Strip reasoning tags (e.g. <think>...</think>) from reasoning models
-    text = re.sub(r"<think>.*?</think>", "", response_text, flags=re.DOTALL).strip()
+    # Strip reasoning tags (e.g. <think>...</think>, <thought>...</thought>)
+    text = re.sub(
+        r"<(?:think|thought)>.*?(?:</(?:think|thought)>|(?=```)|$)",
+        "",
+        response_text,
+        flags=re.DOTALL,
+    ).strip()
     match = CODE_BLOCK_PATTERN.search(text)
     if match:
         return match.group(1).strip()

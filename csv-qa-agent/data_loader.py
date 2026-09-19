@@ -27,7 +27,10 @@ def load_dataset(file_path: str | Path) -> pd.DataFrame:
     suffix = path.suffix.lower()
 
     if suffix == ".csv":
-        df = pd.read_csv(path)
+        try:
+            df = pd.read_csv(path)
+        except UnicodeDecodeError:
+            df = pd.read_csv(path, encoding="latin1")
     elif suffix == ".tsv":
         df = pd.read_csv(path, sep="\t")
     elif suffix in (".xlsx", ".xls"):
@@ -66,7 +69,7 @@ def build_schema_summary(df: pd.DataFrame, sample_rows: int = 5) -> str:
     This is what gets sent to the LLM — it never sees the full dataset.
     """
     lines = [
-        f"Shape: {df.shape[0]} rows × {df.shape[1]} columns",
+        f"Shape: {df.shape[0]} rows x {df.shape[1]} columns",
         "",
         "Columns and dtypes:",
     ]

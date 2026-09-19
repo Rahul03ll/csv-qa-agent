@@ -106,6 +106,42 @@ class TestCheckImports:
         with pytest.raises(CodeExecutionError, match="Blocked import"):
             _check_imports("import builtins")
 
+    def test_blocks_builtins_name(self):
+        with pytest.raises(CodeExecutionError, match="Blocked access to restricted name: '__builtins__'"):
+            _check_imports("x = __builtins__")
+
+    def test_blocks_builtins_subscript_call(self):
+        with pytest.raises(CodeExecutionError, match="Blocked access to restricted name: '__builtins__'"):
+            _check_imports("f = __builtins__['open']('test.txt')")
+
+    def test_blocks_subclasses_attribute(self):
+        with pytest.raises(CodeExecutionError, match=r"Blocked attribute access: '\.__subclasses__'"):
+            _check_imports("x = ().__class__.__subclasses__()")
+
+    def test_blocks_to_csv(self):
+        with pytest.raises(CodeExecutionError, match=r"Blocked attribute access: '\.to_csv'"):
+            _check_imports("df.to_csv('leak.csv')")
+
+    def test_blocks_to_pickle(self):
+        with pytest.raises(CodeExecutionError, match=r"Blocked attribute access: '\.to_pickle'"):
+            _check_imports("df.to_pickle('payload.pkl')")
+
+    def test_blocks_read_pickle(self):
+        with pytest.raises(CodeExecutionError, match=r"Blocked attribute access: '\.read_pickle'"):
+            _check_imports("pd.read_pickle('payload.pkl')")
+
+    def test_allows_df_eval(self, sample_df):
+        result, _ = execute_code("result = df.eval('score + 10')", sample_df)
+        assert list(result) == [95, 102, 88]
+
+    def test_safe_import_math(self, sample_df):
+        result, _ = execute_code("import math\nresult = math.sqrt(16)", sample_df)
+        assert result == 4.0
+
+    def test_safe_import_datetime(self, sample_df):
+        result, _ = execute_code("import datetime\nresult = datetime.date(2025, 1, 1).year", sample_df)
+        assert result == 2025
+
     def test_empty_code_raises(self, sample_df):
         with pytest.raises(CodeExecutionError, match="empty"):
             execute_code("", sample_df)

@@ -188,9 +188,13 @@ if "dataset_name" not in st.session_state:
 
 
 def _load_qa_log() -> list[dict]:
-    if LOG_PATH.exists():
-        with open(LOG_PATH, encoding="utf-8") as f:
-            return json.load(f)
+    if LOG_PATH.exists() and LOG_PATH.stat().st_size > 0:
+        try:
+            with open(LOG_PATH, encoding="utf-8") as f:
+                data = json.load(f)
+                return data if isinstance(data, list) else []
+        except (json.JSONDecodeError, OSError):
+            return []
     return []
 
 

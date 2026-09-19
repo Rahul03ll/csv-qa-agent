@@ -57,7 +57,7 @@ def main() -> None:
     log: list[dict] = []
 
     print(f"Running {len(TEST_QUESTIONS)} test questions on {dataset.name}...")
-    print(f"Dataset: {df.shape[0]} rows × {df.shape[1]} columns\n")
+    print(f"Dataset: {df.shape[0]} rows x {df.shape[1]} columns\n")
 
     for i, question in enumerate(TEST_QUESTIONS, 1):
         print(f"[{i}/{len(TEST_QUESTIONS)}] {question}")

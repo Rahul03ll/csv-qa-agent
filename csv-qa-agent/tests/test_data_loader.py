@@ -80,7 +80,7 @@ class TestParseDateColumns:
 class TestBuildSchemaSummary:
     def test_contains_shape(self, sample_df):
         schema = build_schema_summary(sample_df)
-        assert "3 rows × 5 columns" in schema
+        assert "3 rows x 5 columns" in schema
 
     def test_contains_columns(self, sample_df):
         schema = build_schema_summary(sample_df)
@@ -111,7 +111,7 @@ class TestBuildSchemaSummary:
     def test_empty_dataframe_handling(self):
         df = pd.DataFrame({"col_num": pd.Series(dtype="float64"), "col_str": pd.Series(dtype="object")})
         schema = build_schema_summary(df)
-        assert "0 rows × 2 columns" in schema
+        assert "0 rows x 2 columns" in schema
         assert "empty dataset" in schema
 
     def test_categorical_column_handling(self):

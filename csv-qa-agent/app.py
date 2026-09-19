@@ -27,10 +27,14 @@ MAX_RETRIES = 1
 
 
 def load_log(log_path: Path) -> list[dict]:
-    """Load existing Q&A log entries from disk."""
-    if log_path.exists():
-        with open(log_path, encoding="utf-8") as f:
-            return json.load(f)
+    """Load existing Q&A log entries from disk safely."""
+    if log_path.exists() and log_path.stat().st_size > 0:
+        try:
+            with open(log_path, encoding="utf-8") as f:
+                data = json.load(f)
+                return data if isinstance(data, list) else []
+        except (json.JSONDecodeError, OSError):
+            return []
     return []
 
 
@@ -54,7 +58,22 @@ def answer_question(
     except Exception:
         model_info = {"provider": "unknown", "model": "unknown"}
 
-    code = generate_code(schema, question)
+    try:
+        code = generate_code(schema, question)
+    except EnvironmentError as err:
+        if verbose:
+            print(f"\nConfiguration Error: {err}\n", file=sys.stderr)
+        return {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "question": question,
+            "code": None,
+            "result": None,
+            "status": "error",
+            "error": str(err),
+            "model": model_info.get("model", "none"),
+            "provider": model_info.get("provider", "none"),
+        }
+
     if verbose:
         print("\n--- Generated code ---")
         print(code)
@@ -116,7 +135,7 @@ def run_interactive(dataset_path: Path, log_path: Path) -> None:
 
     print(f"\n{'='*60}")
     print(f"  CSV Q&A Agent — Loaded: {dataset_path.name}")
-    print(f"  {df.shape[0]} rows × {df.shape[1]} columns")
+    print(f"  {df.shape[0]} rows x {df.shape[1]} columns")
     print(f"{'='*60}")
     print("Ask questions about the data. Type 'quit' or 'exit' to stop.\n")
 
