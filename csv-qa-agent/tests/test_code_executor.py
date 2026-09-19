@@ -89,6 +89,32 @@ class TestCheckImports:
         # Syntax errors should not raise in _check_imports (let exec handle it)
         _check_imports("this is not valid python")  # should not raise
 
+    def test_blocks_open_call(self):
+        with pytest.raises(CodeExecutionError, match=r"Blocked function call: 'open\(\)'"):
+            _check_imports("open('secret.txt')")
+
+    def test_blocks_eval_call(self):
+        with pytest.raises(CodeExecutionError, match=r"Blocked function call: 'eval\(\)'"):
+            _check_imports("eval('1+1')")
+
+    def test_blocks_exec_call(self):
+        with pytest.raises(CodeExecutionError, match=r"Blocked function call: 'exec\(\)'"):
+            _check_imports("exec('x = 1')")
+
+
+    def test_blocks_builtins_import(self):
+        with pytest.raises(CodeExecutionError, match="Blocked import"):
+            _check_imports("import builtins")
+
+    def test_empty_code_raises(self, sample_df):
+        with pytest.raises(CodeExecutionError, match="empty"):
+            execute_code("", sample_df)
+
+    def test_none_df_raises(self):
+        with pytest.raises(CodeExecutionError, match="None"):
+            execute_code("result = 1", None)
+
+
 
 class TestFormatResult:
     def test_string(self):

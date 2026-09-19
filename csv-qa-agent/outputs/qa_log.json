@@ -1,6 +1,6 @@
 [
   {
-    "timestamp": "2026-08-18T11:57:24.663366+00:00",
+    "timestamp": "2026-09-19T18:21:39.967028+00:00",
     "question": "What is the rating of Biryani Blues?",
     "code": "result = df.loc[df[\"name\"] == \"Biryani Blues\", \"rating\"].iloc[0]",
     "result": "3.1",
@@ -8,7 +8,7 @@
     "source": "sample_log (representative code; use run_tests.py for LLM-generated code)"
   },
   {
-    "timestamp": "2026-08-18T11:57:24.668823+00:00",
+    "timestamp": "2026-09-19T18:21:39.982025+00:00",
     "question": "How many restaurants in Mumbai have online ordering?",
     "code": "result = len(df[(df[\"city\"] == \"Mumbai\") & (df[\"online_order\"] == \"Yes\")])",
     "result": "10",
@@ -16,7 +16,7 @@
     "source": "sample_log (representative code; use run_tests.py for LLM-generated code)"
   },
   {
-    "timestamp": "2026-08-18T11:57:24.680723+00:00",
+    "timestamp": "2026-09-19T18:21:40.000120+00:00",
     "question": "What is the average rating for each cuisine type? Sort from highest to lowest.",
     "code": "result = df.groupby(\"cuisine\")[\"rating\"].mean().sort_values(ascending=False)",
     "result": "cuisine\nAmerican        4.500000\nMughlai         4.400000\nCafe            4.371429\nKorean          4.250000\nChinese         3.850000\nBBQ             3.733333\nStreet Food     3.700000\nHyderabadi      3.650000\nSouth Indian    3.640000\nThai            3.600000\nRajasthani      3.585714\nItalian         3.583333\nBengali         3.575000\nContinental     3.558333\nJapanese        3.414286\nSeafood         3.400000\nMexican         3.400000\nNorth Indian    3.220000\nLebanese        3.200000\nDesserts        2.600000",
@@ -24,7 +24,7 @@
     "source": "sample_log (representative code; use run_tests.py for LLM-generated code)"
   },
   {
-    "timestamp": "2026-08-18T11:57:24.692025+00:00",
+    "timestamp": "2026-09-19T18:21:40.029758+00:00",
     "question": "Which 5 restaurants have the highest number of votes? Show name, city, and votes.",
     "code": "result = df.nlargest(5, \"votes\")[[\"name\", \"city\", \"votes\"]]",
     "result": "                 name       city  votes\n65  Rustic Junction 8       Pune   4933\n71        Basil Bites       Pune   4845\n4         Dosa Corner     Mumbai   4779\n42       Golden Bites  Bangalore   4765\n70     Ginger Express    Chennai   4762",
@@ -32,7 +32,7 @@
     "source": "sample_log (representative code; use run_tests.py for LLM-generated code)"
   },
   {
-    "timestamp": "2026-08-18T11:57:24.704728+00:00",
+    "timestamp": "2026-09-19T18:21:40.054900+00:00",
     "question": "How many restaurants were listed each month? Show as a table.",
     "code": "df[\"listed_date\"] = pd.to_datetime(df[\"listed_date\"])\nresult = df.groupby(df[\"listed_date\"].dt.to_period(\"M\")).size().reset_index(name=\"count\")",
     "result": "   listed_date  count\n0      2023-01      4\n1      2023-02      2\n2      2023-03     13\n3      2023-04      6\n4      2023-05      4\n5      2023-06      1\n6      2023-07      3\n7      2023-08     14\n8      2023-09      3\n9      2023-10      4\n10     2023-11      4\n11     2023-12      5\n12     2024-01      4\n13     2024-02      3\n14     2024-03      7\n15     2024-04      5\n16     2024-05      3\n17     2024-06      4\n18     2024-07     11",
@@ -40,7 +40,7 @@
     "source": "sample_log (representative code; use run_tests.py for LLM-generated code)"
   },
   {
-    "timestamp": "2026-08-18T11:57:24.708263+00:00",
+    "timestamp": "2026-09-19T18:21:40.070507+00:00",
     "question": "What is the average cost for two among restaurants rated 4.5 or above?",
     "code": "result = df[df[\"rating\"] >= 4.5][\"cost_for_two\"].mean()",
     "result": "814.2857142857143",
@@ -48,7 +48,7 @@
     "source": "sample_log (representative code; use run_tests.py for LLM-generated code)"
   },
   {
-    "timestamp": "2026-08-18T11:57:24.711540+00:00",
+    "timestamp": "2026-09-19T18:21:40.085521+00:00",
     "question": "Which city has the most restaurants and how many?",
     "code": "counts = df[\"city\"].value_counts()\nresult = f\"{counts.index[0]} with {counts.iloc[0]} restaurants\"",
     "result": "Bangalore with 20 restaurants",
@@ -56,7 +56,7 @@
     "source": "sample_log (representative code; use run_tests.py for LLM-generated code)"
   },
   {
-    "timestamp": "2026-08-18T11:57:24.713845+00:00",
+    "timestamp": "2026-09-19T18:21:40.099517+00:00",
     "question": "What is the cheapest restaurant (lowest cost_for_two) and where is it located?",
     "code": "row = df.loc[df[\"cost_for_two\"].idxmin()]\nresult = f\"{row['name']} in {row['city']}, {row['area']} (₹{row['cost_for_two']} for two)\"",
     "result": "Ramen Room in Bangalore, HSR Layout (₹200 for two)",
@@ -64,7 +64,7 @@
     "source": "sample_log (representative code; use run_tests.py for LLM-generated code)"
   },
   {
-    "timestamp": "2026-08-18T11:57:24.717458+00:00",
+    "timestamp": "2026-09-19T18:21:40.117505+00:00",
     "question": "How many restaurants offer both online ordering and table booking?",
     "code": "result = len(df[(df[\"online_order\"] == \"Yes\") & (df[\"book_table\"] == \"Yes\")])",
     "result": "28",
@@ -72,7 +72,7 @@
     "source": "sample_log (representative code; use run_tests.py for LLM-generated code)"
   },
   {
-    "timestamp": "2026-08-18T11:57:24.720577+00:00",
+    "timestamp": "2026-09-19T18:21:40.133507+00:00",
     "question": "What is the total number of votes for all North Indian restaurants?",
     "code": "result = df[df[\"cuisine\"] == \"North Indian\"][\"votes\"].sum()",
     "result": "17395",
@@ -80,7 +80,7 @@
     "source": "sample_log (representative code; use run_tests.py for LLM-generated code)"
   },
   {
-    "timestamp": "2026-08-18T11:57:24.723630+00:00",
+    "timestamp": "2026-09-19T18:21:40.151015+00:00",
     "question": "Which area (neighborhood) has the most restaurants? Show the top 5.",
     "code": "result = df[\"area\"].value_counts().head(5)",
     "result": "area\nSaket          7\nKoramangala    6\nColaba         5\nGachibowli     5\nPowai          4",
@@ -88,7 +88,7 @@
     "source": "sample_log (representative code; use run_tests.py for LLM-generated code)"
   },
   {
-    "timestamp": "2026-08-18T11:57:24.726754+00:00",
+    "timestamp": "2026-09-19T18:21:40.164660+00:00",
     "question": "How many restaurants are in each restaurant_type category?",
     "code": "result = df[\"restaurant_type\"].value_counts()",
     "result": "restaurant_type\nDine-out    27\nCafé        26\nTakeaway    25\nDelivery    22",
@@ -96,7 +96,7 @@
     "source": "sample_log (representative code; use run_tests.py for LLM-generated code)"
   },
   {
-    "timestamp": "2026-08-18T11:57:24.730352+00:00",
+    "timestamp": "2026-09-19T18:21:40.178661+00:00",
     "question": "What is the average rating for each cost_category (Budget, Mid-range, Premium)?",
     "code": "result = df.groupby(\"cost_category\")[\"rating\"].mean().sort_values(ascending=False)",
     "result": "cost_category\nBudget       3.755556\nPremium      3.700000\nMid-range    3.654348",
@@ -104,7 +104,7 @@
     "source": "sample_log (representative code; use run_tests.py for LLM-generated code)"
   },
   {
-    "timestamp": "2026-08-18T11:57:24.735968+00:00",
+    "timestamp": "2026-09-19T18:21:40.190648+00:00",
     "question": "Which cuisine has the highest average cost_for_two? Show top 5 cuisines.",
     "code": "result = df.groupby(\"cuisine\")[\"cost_for_two\"].mean().sort_values(ascending=False).head(5)",
     "result": "cuisine\nKorean         1800.000000\nJapanese       1792.857143\nSeafood        1550.000000\nThai           1466.666667\nContinental    1287.500000",
@@ -112,7 +112,7 @@
     "source": "sample_log (representative code; use run_tests.py for LLM-generated code)"
   },
   {
-    "timestamp": "2026-08-18T11:57:24.747539+00:00",
+    "timestamp": "2026-09-19T18:21:40.211649+00:00",
     "question": "For each city, what percentage of restaurants have online ordering?",
     "code": "grouped = df.groupby(\"city\")[\"online_order\"].apply(lambda x: (x == \"Yes\").mean() * 100).round(1)\nresult = grouped.sort_values(ascending=False)",
     "result": "city\nKolkata      90.0\nMumbai       83.3\nChennai      80.0\nPune         76.9\nBangalore    75.0\nHyderabad    61.5\nDelhi        55.6\nJaipur       50.0",

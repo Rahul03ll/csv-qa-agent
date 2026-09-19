@@ -10,11 +10,15 @@ Features:
 import os
 import re
 
-from dotenv import load_dotenv
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except (ImportError, Exception):
+    pass
 
 from prompts import RETRY_PROMPT, SYSTEM_PROMPT, build_user_message
 
-load_dotenv()
+
 
 CODE_BLOCK_PATTERN = re.compile(r"```(?:python)?\s*\n(.*?)```", re.DOTALL | re.IGNORECASE)
 
@@ -26,11 +30,12 @@ REQUEST_TIMEOUT = 30  # seconds
 
 def extract_code(response_text: str) -> str:
     """Extract Python code from a markdown fenced block or raw response."""
-    match = CODE_BLOCK_PATTERN.search(response_text)
+    # Strip reasoning tags (e.g. <think>...</think>) from reasoning models
+    text = re.sub(r"<think>.*?</think>", "", response_text, flags=re.DOTALL).strip()
+    match = CODE_BLOCK_PATTERN.search(text)
     if match:
         return match.group(1).strip()
 
-    text = response_text.strip()
     if text.startswith("```"):
         lines = text.split("\n")
         if lines[0].startswith("```"):
@@ -40,6 +45,7 @@ def extract_code(response_text: str) -> str:
         return "\n".join(lines).strip()
 
     return text
+
 
 
 def _provider() -> str:
@@ -134,6 +140,10 @@ def generate_code(
 
 def get_model_info() -> dict[str, str]:
     """Return current provider and model name for logging."""
-    provider = _provider()
-    model = _default_model(provider)
-    return {"provider": provider, "model": model}
+    try:
+        provider = _provider()
+        model = _default_model(provider)
+        return {"provider": provider, "model": model}
+    except EnvironmentError:
+        return {"provider": "none", "model": "none"}
+

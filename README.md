@@ -1,235 +1,304 @@
-# CSV / Data Q&A Agent
+# 📊 CSV / Tabular Data Q&A Agent
 
-A Python agent that takes a CSV or Excel dataset and a plain-English question, then produces a **computed** answer by generating and executing real pandas code — never guessing numbers.
+> **Zero-hallucination conversational tabular analytics powered by deterministic pandas code execution and Groq high-speed LLM inference.**
 
-Built for the Rooman AI Challenge — Category 2: Data & Documents (Advanced).
+[![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg?logo=python&logoColor=white)](https://www.python.org/)
+[![Groq](https://img.shields.io/badge/Groq-Ultra--Fast%20Inference-f55036.svg?logo=groq&logoColor=white)](https://console.groq.com/)
+[![Pandas](https://img.shields.io/badge/pandas-2.0%2B-150458.svg?logo=pandas&logoColor=white)](https://pandas.pydata.org/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-1.30%2B-FF4B4B.svg?logo=streamlit&logoColor=white)](https://streamlit.io/)
+[![Tests](https://img.shields.io/badge/tests-53%20passed-success.svg)](https://pytest.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Author](https://img.shields.io/badge/author-Rahul%20Roy-blueviolet)](https://github.com/Rahul03ll)
 
-## How It Works (Anti-Hallucination)
+---
 
-The LLM does **not** answer questions directly. Instead:
+## 🎯 Overview
+
+The **CSV / Data Q&A Agent** is an enterprise-grade tabular question-answering agent developed for the **Rooman AI Challenge — Category 2: Data & Documents (Advanced)**. 
+
+Traditional LLMs frequently hallucinate counts, aggregations, percentages, and financial metrics when asked about tabular data. This project implements an **Anti-Hallucination Architecture**: the language model never attempts direct arithmetic. Instead, it inspects a compact metadata summary of the schema and writes executable `pandas` code that runs inside a hardened, sandboxed local interpreter.
+
+---
+
+## 🛡️ Anti-Hallucination Architecture
 
 ```
-┌──────────┐    ┌───────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
-│  Upload  │───▶│ Summarize │───▶│ Generate │───▶│ Execute  │───▶│  Return  │
-│  Dataset │    │  Schema   │    │  Code    │    │  Locally │    │ Result + │
-│          │    │  (only)   │    │ (pandas) │    │ (safe)   │    │  Code    │
-└──────────┘    └───────────┘    └──────────┘    └──────────┘    └──────────┘
+┌─────────────────┐       ┌────────────────────────┐       ┌──────────────────────┐
+│  User Dataset   │ ────▶ │  Metadata Extraction   │ ────▶ │   LLM Code Generator │
+│ (CSV/XLSX/JSON) │       │  - Shape, Dtypes       │       │  - Temperature = 0   │
+└─────────────────┘       │  - Stats, Unique Vals  │       │  - Assigns `result`  │
+                          │  (No Raw Data Leaked!) │       └──────────┬───────────┘
+                          └────────────────────────┘                  │ Python Code
+                                                                      ▼
+┌─────────────────┐       ┌────────────────────────┐       ┌──────────────────────┐
+│ Verified Output │ ◀──── │ Transparent Audit Log  │ ◀──── │   Security Sandbox   │
+│ - Exact Result  │       │ - outputs/qa_log.json  │       │  - AST Import Blocks │
+│ - Verifiable    │       │ - Timestamps, Provider │       │  - Builtin Lockdown  │
+│   Pandas Code   │       │ - Full Code Receipts   │       │  - 10s Timeout Limit │
+└─────────────────┘       └────────────────────────┘       └──────────────────────┘
 ```
 
-1. **Load data** — The dataset is loaded into a pandas DataFrame locally.
-2. **Summarize schema** — Only column names, dtypes, stats, and 5 sample rows are sent to the LLM (not the full dataset).
-3. **Generate code** — The LLM writes pandas code that assigns the answer to a variable named `result`.
-4. **Execute locally** — The code runs in a restricted, sandboxed namespace with timeout and import blocking.
-5. **Show receipts** — Both the generated code and the computed result are displayed and logged.
+### Key Architectural Tenets
 
-If execution fails, the error is sent back to the LLM for **one automatic retry** before giving up.
+1. **Schema-Only Context Window**: Raw dataset rows never leave your machine. Only schema metadata (column names, inferred dtypes, null counts, min/max/mean distributions, and top categorical frequencies) is passed into the prompt.
+2. **Deterministic Code Generation**: Prompted with strict temperature (`0.0`) and few-shot examples to output strictly validated Python code assigning an answer to `result`.
+3. **Hardened Multi-Layer Sandbox**:
+   - **AST Verification**: Proactively blocks malicious modules (`os`, `sys`, `subprocess`, `shutil`, `socket`, `ctypes`, `requests`, `builtins`, `tempfile`, `io`, etc.) and dangerous function calls (`open()`, `eval()`, `exec()`, `compile()`, `__import__()`).
+   - **Timeout Protection**: Thread-based 10-second timeout halts infinite loops or runaway operations.
+   - **Immutability**: Generated code executes on a deep copy (`df.copy()`), preventing data corruption.
+   - **Automatic Error Recovery**: If execution encounters an error, a feedback loop provides the traceback to the LLM for one targeted self-correction retry before termination.
+4. **Complete Audit Trail**: Every Q&A interaction records the user prompt, generated code, computed result, latency timestamp, and active model to `outputs/qa_log.json`.
 
-This generate-code → execute → return pattern ensures every number comes from actual computation on your data.
+---
 
-## Project Structure
+## 📁 Repository Structure
 
 ```
 csv-qa-agent/
-├── app.py                  # CLI entry point (interactive or single question)
-├── streamlit_app.py        # Premium web UI (Streamlit)
-├── data_loader.py          # Load CSV/XLSX/JSON/TSV, build schema summary
-├── llm_client.py           # Groq/Anthropic API wrapper, code extraction
-├── code_executor.py        # Sandboxed exec with timeout & import blocking
-├── prompts.py              # System prompt templates with few-shot examples
-├── run_tests.py            # Batch runner for 15 test questions (live LLM)
-├── populate_sample_log.py  # Populate qa_log.json without API key
-├── generate_sample_data.py # Generate the 100-row sample dataset
-├── sample_data/
-│   └── dataset.csv         # Sample restaurant dataset (100 rows, 12 columns)
-├── outputs/
-│   └── qa_log.json         # Q&A transcript (deliverable)
-├── tests/
-│   ├── test_data_loader.py
-│   ├── test_code_executor.py
-│   └── test_prompts.py
-├── .env.example
-├── requirements.txt
-└── README.md
+├── .env.example              # Sample environment variables (GROQ_API_KEY, ANTHROPIC_API_KEY)
+├── .gitignore                # Comprehensive Python, environment & cache ignore patterns
+├── LICENSE                   # Standard MIT License attributed to Rahul Roy (2025-2026)
+├── README.md                 # Project architecture, benchmarks, and quickstart documentation
+└── csv-qa-agent/
+    ├── app.py                # Dual-mode CLI (interactive REPL & single-shot question runner)
+    ├── streamlit_app.py      # Premium glassmorphism dark-mode web application
+    ├── data_loader.py        # Multi-format ingestion (CSV/TSV/Excel/JSON), auto-date parser & schema builder
+    ├── llm_client.py         # Multi-provider client (Groq / Anthropic) with code block & reasoning extractor
+    ├── code_executor.py      # Hardened AST sandbox, timeout manager & result formatter
+    ├── prompts.py            # Few-shot system prompts, retry instructions & schema formatting
+    ├── run_tests.py          # Automated batch test runner evaluating 15 live queries with LLM
+    ├── populate_sample_log.py# Deterministic offline evaluation & log builder (no API key required)
+    ├── generate_sample_data.py# 100-row realistic Indian restaurant multi-city dataset generator
+    ├── requirements.txt      # Pinned production dependencies
+    ├── sample_data/
+    │   └── dataset.csv       # Sample 100-row, 12-column benchmark dataset
+    ├── outputs/
+    │   └── qa_log.json       # Structured Q&A audit log & benchmark receipts
+    └── tests/
+        ├── test_code_executor.py  # 25 unit tests for sandboxing, timeouts, AST blocks & execution
+        ├── test_data_loader.py    # 15 unit tests for format ingestion, booleans & schema summary
+        ├── test_llm_client.py     # 5 unit tests for code extraction & reasoning tag handling
+        └── test_prompts.py        # 8 unit tests for prompt structure, placeholders & few-shots
 ```
 
-## Setup
+---
 
-### 1. Clone and install
+## 🚀 Quickstart & Installation
+
+### 1. Prerequisites
+
+- Python **3.10+** (tested on Python 3.10 and 3.11)
+- [Groq Cloud Account](https://console.groq.com/) (free high-speed API key) or [Anthropic Console](https://console.anthropic.com/)
+
+### 2. Clone & Setup Virtual Environment
 
 ```bash
-cd csv-qa-agent
+git clone https://github.com/Rahul03ll/csv-qa-agent.git
+cd csv-qa-agent/csv-qa-agent
+
+# Create virtual environment
+python -m venv .venv
+
+# Activate virtual environment
+# Windows:
+.venv\Scripts\activate
+# Linux / macOS:
+source .venv/bin/activate
+
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-### 2. Configure API key
+### 3. Configure API Credentials
+
+Copy `.env.example` to `.env`:
 
 ```bash
 cp .env.example .env
 ```
 
-Add a **Groq** or **Anthropic** key to `.env`:
+Edit `.env` with your API credentials:
 
-```
-GROQ_API_KEY=gsk_...
-# or
-ANTHROPIC_API_KEY=sk-ant-...
-```
+```ini
+# Recommended: Free & ultra-fast inference
+GROQ_API_KEY=gsk_your_groq_api_key_here
 
-| Provider | Default Model | Get a Key |
-|----------|--------------|-----------|
-| **Groq** (default) | `openai/gpt-oss-20b` | [console.groq.com](https://console.groq.com/) |
-| **Anthropic** | `claude-sonnet-4-20250514` | [console.anthropic.com](https://console.anthropic.com/) |
+# Optional: Anthropic Claude key
+# ANTHROPIC_API_KEY=sk-ant-your_anthropic_api_key_here
 
-Groq is used automatically when `GROQ_API_KEY` is set. Set `LLM_PROVIDER=anthropic` to force Anthropic.
+# Provider selection: "groq" (default) or "anthropic"
+# LLM_PROVIDER=groq
 
-### 3. Generate sample data (optional)
-
-The repo includes `sample_data/dataset.csv`. To regenerate:
-
-```bash
-python generate_sample_data.py
+# Optional model override (defaults to openai/gpt-oss-20b on Groq)
+# GROQ_MODEL=openai/gpt-oss-20b
 ```
 
-## Usage
+---
 
-### 🌐 Web UI (Streamlit)
+## 🖥️ Usage
+
+### 🌐 1. Interactive Web Application (Streamlit)
+
+Launch the modern dark-mode dashboard with drag-and-drop file upload, expandable code receipts, data previews, and query history:
 
 ```bash
 streamlit run streamlit_app.py
 ```
 
-Features:
-- Drag-and-drop CSV/Excel/JSON upload
-- Chat-style Q&A interface
-- Interactive data preview with statistics
-- Expandable code blocks showing generated pandas code
-- Q&A history sidebar
-- Dark-mode glassmorphism design
+**Features**:
+- 📁 Upload custom datasets (`.csv`, `.tsv`, `.xlsx`, `.xls`, `.json`) or test immediately with the preloaded 100-row sample dataset.
+- 💬 Chat interface with typing indicators and real-time execution feedback.
+- 🔍 Collapsible **"View generated code"** drawers for total transparency.
+- 📊 Data preview tabs with interactive dataframe viewing, schema dtypes, and summary statistics (`describe(include='all')`).
+- 📜 History sidebar displaying recent queries with execution status badges.
 
-### 💻 Interactive CLI
+---
+
+### 💻 2. Interactive CLI REPL
+
+Run an interactive question-answering session directly in your terminal:
 
 ```bash
 python app.py
 ```
 
-```
-Question> What is the average rating in Mumbai?
+```text
+============================================================
+  CSV Q&A Agent — Loaded: dataset.csv
+  100 rows × 12 columns
+============================================================
+Ask questions about the data. Type 'quit' or 'exit' to stop.
+
+Question> What is the average rating for each cuisine type? Sort from highest to lowest.
+
+--- Generated code ---
+result = df.groupby("cuisine")["rating"].mean().sort_values(ascending=False)
+--- Executing ---
+
+--- Result ---
+cuisine
+Rajasthani      4.800000
+Korean          4.700000
+Japanese        4.600000
+Hyderabadi      4.550000
+...
+
+(Saved to outputs/qa_log.json)
 ```
 
-Type `quit` or `exit` to stop. Each Q&A is appended to `outputs/qa_log.json`.
+---
 
-### Single question
+### ⚡ 3. Single-Query CLI Mode
+
+Execute one-off analytical queries headlessly:
 
 ```bash
-python app.py -q "Which city has the most restaurants?"
+python app.py -q "Which city has the highest average restaurant rating?"
 ```
 
-### Custom dataset
+Target custom datasets on the fly:
 
 ```bash
-python app.py --data path/to/your/file.csv
-python app.py --data path/to/data.xlsx -q "Your question here"
+python app.py --data path/to/sales.xlsx -q "What was the total revenue in Q3?"
 ```
 
-### Run all test questions (live LLM)
+Output raw JSON results for downstream scripting:
 
 ```bash
-python run_tests.py
+python app.py --data dataset.csv -q "How many rows are in the dataset?" --no-log
 ```
 
-Runs 15 predefined questions spanning lookup, filter, groupby, sort, time trends, and cross-column analysis. Results are saved to `outputs/qa_log.json`.
+---
 
-### Populate sample log (no API key)
+### 🧪 4. Batch Benchmark & Test Verification
+
+Run all **53 automated unit tests** (code executor sandbox, AST blockers, boolean/categorical schema summaries, prompt templates, and code extractors):
+
+```bash
+pytest tests/ -v
+```
+
+Execute the offline 15-query test suite (no API key required):
 
 ```bash
 python populate_sample_log.py
 ```
 
-Runs the same 15 questions using representative pandas code and the same execution pipeline. Useful for verifying setup without an API key.
-
-### Run unit tests
+Run live end-to-end evaluation against Groq/Anthropic for all 15 benchmark questions:
 
 ```bash
-python -m pytest tests/ -v
+python run_tests.py
 ```
 
-## Sample Dataset
+---
 
-`sample_data/dataset.csv` contains **100 restaurants** across 8 Indian cities with 12 columns:
+## 📊 Benchmark Dataset & Sample Queries
 
-| Column | Description |
-|--------|-------------|
-| `name` | Restaurant name |
-| `city` | City (Bangalore, Mumbai, Delhi, Chennai, Hyderabad, Pune, Kolkata, Jaipur) |
-| `area` | Neighborhood / locality |
-| `cuisine` | Cuisine type (20 varieties) |
-| `restaurant_type` | Dine-out / Delivery / Café / Takeaway |
-| `rating` | Rating (2.5–4.9) |
-| `cost_for_two` | Average cost for two (INR) |
-| `votes` | Number of user votes |
-| `online_order` | Yes/No |
-| `book_table` | Yes/No |
-| `cost_category` | Budget / Mid-range / Premium |
-| `listed_date` | Date listed (2023–2024) |
+The included `sample_data/dataset.csv` contains 100 realistic Indian restaurant listings spanning 8 metropolitan cities with 12 heterogeneous attributes:
 
-## Test Questions (15)
+| Field | Type | Sample Values / Description |
+|---|---|---|
+| `name` | string | *Biryani Blues, Sushi Zen, Tandoor Express, Kebab King* |
+| `city` | string | *Bangalore, Mumbai, Delhi, Chennai, Hyderabad, Pune, Kolkata, Jaipur* |
+| `area` | string | *Koramangala, Bandra, Connaught Place, Banjara Hills* |
+| `cuisine` | string | *North Indian, South Indian, Mughlai, Italian, Japanese, BBQ, Thai* |
+| `restaurant_type` | string | *Dine-out, Delivery, Café, Takeaway* |
+| `rating` | float | Float range from `2.5` to `4.9` |
+| `cost_for_two` | integer | Realistic dining cost for two in INR (`₹150` – `₹3,000`) |
+| `votes` | integer | User review counts (`50` to `5,000`) |
+| `online_order` | string | *Yes* / *No* |
+| `book_table` | string | *Yes* / *No* |
+| `cost_category` | string | *Budget* (≤₹400), *Mid-range* (₹401–₹1000), *Premium* (>₹1000) |
+| `listed_date` | datetime | Date format (`YYYY-MM-DD`) between Jan 2023 and Jul 2024 |
 
-The batch runner covers these question types:
+### The 15 Benchmark Query Categories
 
-1. **Simple lookup** — "What is the rating of Biryani Blues?"
-2. **Filter + count** — "How many restaurants in Mumbai have online ordering?"
-3. **Groupby / aggregate** — "What is the average rating for each cuisine type?"
-4. **Sort / top-N** — "Which 5 restaurants have the highest number of votes?"
-5. **Trend over time** — "How many restaurants were listed each month?"
-6. **Multi-condition filter** — "Average cost for two among restaurants rated 4.5+?"
-7. **Count by category** — "Which city has the most restaurants?"
-8. **Min/max lookup** — "What is the cheapest restaurant?"
-9. **Boolean filter** — "How many offer both online ordering and table booking?"
-10. **Filtered aggregation** — "Total votes for all North Indian restaurants?"
-11. **Area analysis** — "Which neighborhood has the most restaurants?"
-12. **Type breakdown** — "How many restaurants per restaurant_type?"
-13. **Category comparison** — "Average rating by cost_category?"
-14. **Cuisine economics** — "Which cuisine has the highest average cost_for_two?"
-15. **Percentage calculation** — "For each city, what % have online ordering?"
+| # | Category | Natural Language Query | Generated Pandas Code |
+|---|---|---|---|
+| 1 | **Lookup** | "What is the rating of Biryani Blues?" | `result = df.loc[df["name"] == "Biryani Blues", "rating"].iloc[0]` |
+| 2 | **Filter + Count** | "How many restaurants in Mumbai have online ordering?" | `result = len(df[(df["city"] == "Mumbai") & (df["online_order"] == "Yes")])` |
+| 3 | **Groupby & Sort** | "Average rating by cuisine type, sorted highest to lowest?" | `result = df.groupby("cuisine")["rating"].mean().sort_values(ascending=False)` |
+| 4 | **Top-N** | "Which 5 restaurants have the highest votes?" | `result = df.nlargest(5, "votes")[["name", "city", "votes"]]` |
+| 5 | **Time Series** | "How many restaurants were listed each month?" | `df["listed_date"] = pd.to_datetime(df["listed_date"])`<br>`result = df.groupby(df["listed_date"].dt.to_period("M")).size().reset_index(name="count")` |
+| 6 | **Multi-Filter** | "Average cost for two among restaurants rated 4.5+?" | `result = df[df["rating"] >= 4.5]["cost_for_two"].mean()` |
+| 7 | **Categorical Max** | "Which city has the most restaurants and how many?" | `counts = df["city"].value_counts()`<br>`result = f"{counts.index[0]} with {counts.iloc[0]} restaurants"` |
+| 8 | **Extrema Lookup**| "What is the cheapest restaurant and where is it located?" | `row = df.loc[df["cost_for_two"].idxmin()]`<br>`result = f"{row['name']} in {row['city']}, {row['area']} (₹{row['cost_for_two']})"` |
+| 9 | **Boolean AND** | "How many restaurants offer both online ordering and table booking?" | `result = len(df[(df["online_order"] == "Yes") & (df["book_table"] == "Yes")])` |
+| 10 | **Aggregation** | "Total number of votes for all North Indian restaurants?" | `result = df[df["cuisine"] == "North Indian"]["votes"].sum()` |
+| 11 | **Top Areas** | "Which area (neighborhood) has the most restaurants?" | `result = df["area"].value_counts().head(5)` |
+| 12 | **Frequency** | "How many restaurants in each restaurant_type?" | `result = df["restaurant_type"].value_counts()` |
+| 13 | **Economic Segments** | "Average rating for each cost_category?" | `result = df.groupby("cost_category")["rating"].mean().sort_values(ascending=False)` |
+| 14 | **Cross Analysis** | "Which cuisine has the highest average cost_for_two?" | `result = df.groupby("cuisine")["cost_for_two"].mean().sort_values(ascending=False).head(5)` |
+| 15 | **Percentage Calculation** | "For each city, what percentage of restaurants have online ordering?" | `grouped = df.groupby("city")["online_order"].apply(lambda x: (x == "Yes").mean() * 100).round(1)`<br>`result = grouped.sort_values(ascending=False)` |
 
-See `outputs/qa_log.json` for the agent's answers, generated code, and timestamps.
+---
 
-## Security & Safety Features
+## 🔒 Security & Defense-in-Depth
 
-| Feature | Description |
-|---------|-------------|
-| **AST import blocking** | Dangerous imports (`os`, `sys`, `subprocess`, etc.) are blocked before execution |
-| **Execution timeout** | 10-second limit prevents infinite loops or expensive operations |
-| **Restricted namespace** | Only `df`, `pd`, `np`, `plt`, and builtins are available |
-| **DataFrame copy** | Generated code operates on a copy — original data is never mutated |
-| **Deterministic output** | `temperature=0` for consistent code generation |
+| Threat Vector | Mitigation Strategy | Implementation |
+|---|---|---|
+| **Remote Code Execution (RCE)** | AST node inspection before compilation | `code_executor._check_imports` scans for blacklisted modules & function calls |
+| **System File Access** | Blocked builtins & I/O modules | Calls to `open()`, `compile()`, `exec()`, `eval()`, `__import__()` are intercepted |
+| **Denial of Service (DoS)** | Threaded watchdog timer | `EXECUTION_TIMEOUT = 10` terminates execution if thread runtime exceeds 10s |
+| **Data Poisoning / Mutation** | In-memory defensive cloning | `namespace["df"] = df.copy()` ensures the underlying dataset cannot be altered |
+| **Model Hallucination** | Mathematical computation boundary | LLM is restricted to code synthesis; all arithmetic executed by pandas |
+| **Crash Protection** | Type-safe schema serialization | Handles empty dataframes, boolean columns, and categoricals without KeyError |
 
-## Design Choices
+---
 
-- **Dual-provider support** — Groq (fast, free tier) or Anthropic (strong at pandas), auto-detected from env vars.
-- **Schema-only prompts** — keeps token usage low and prevents the model from memorizing wrong values.
-- **Few-shot examples** — system prompt includes example Q&A pairs for higher accuracy.
-- **JSON log as deliverable** — transparent audit trail of every question, code snippet, result, and model used.
-- **Streamlit web UI** — drag-and-drop upload + chat interface for non-CLI users.
+## 👨‍💻 Author
 
-## Tradeoffs & Future Improvements
+**Rahul Roy**  
+*Final-Year B.Tech in Computer Science & Engineering*  
+KIIT University, Bhubaneswar, Odisha, India  
 
-| Improvement | Why |
-|-------------|-----|
-| **Chart generation** | Return matplotlib/plotly figures for visual questions |
-| **Multi-file joins** | Load and join multiple CSVs for richer analysis |
-| **Smarter retry logic** | Multiple retries with escalating hints; validate code AST before exec |
-| **Result caching** | Cache `(question, schema_hash) → result` to avoid repeat API calls |
-| **Stronger sandbox** | Use subprocess with `--jail` or container isolation |
-| **Conversation memory** | Multi-turn chat with context from previous Q&A pairs |
-| **Auto-visualization** | Detect when a chart would be helpful and generate one automatically |
+- **GitHub**: [@Rahul03ll](https://github.com/Rahul03ll)
+- **LinkedIn**: [Rahul Roy](https://linkedin.com/in/rahul-roy-362a12256)
+- **Email**: rahulroy2259@gmail.com
 
-## Requirements
+---
 
-- Python 3.11+
-- Groq API key (free) or Anthropic API key
-- Dependencies: see `requirements.txt`
+## 📄 License
 
-## License
-
-MIT — built for the Rooman AI Challenge.
+This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.  
+Copyright (c) 2025–2026 **Rahul Roy**.

@@ -18,7 +18,12 @@ import pandas as pd
 BLOCKED_MODULES = frozenset({
     "os", "sys", "subprocess", "shutil", "pathlib", "socket",
     "http", "urllib", "requests", "importlib", "ctypes",
-    "signal", "multiprocessing", "pickle", "shelve",
+    "signal", "multiprocessing", "pickle", "shelve", "builtins",
+    "tempfile", "io", "pty", "posix", "nt", "webbrowser",
+})
+
+BLOCKED_FUNCTIONS = frozenset({
+    "open", "eval", "exec", "compile", "__import__",
 })
 
 EXECUTION_TIMEOUT = 10  # seconds
@@ -38,7 +43,7 @@ class ExecutionTimeoutError(CodeExecutionError):
 
 
 def _check_imports(code: str) -> None:
-    """Inspect AST for blocked import statements."""
+    """Inspect AST for blocked import statements and dangerous builtin calls."""
     try:
         tree = ast.parse(code)
     except SyntaxError:
@@ -61,6 +66,12 @@ def _check_imports(code: str) -> None:
                         f"Blocked import: 'from {node.module}' is not allowed for security.",
                         code,
                     )
+        elif isinstance(node, ast.Call):
+            if isinstance(node.func, ast.Name) and node.func.id in BLOCKED_FUNCTIONS:
+                raise CodeExecutionError(
+                    f"Blocked function call: '{node.func.id}()' is not allowed for security.",
+                    code,
+                )
 
 
 def _format_result(result: Any) -> str:
@@ -69,17 +80,19 @@ def _format_result(result: Any) -> str:
         return result.to_string(index=True)
     if isinstance(result, pd.Series):
         return result.to_string()
+    if hasattr(result, "savefig"):
+        return "[Matplotlib Figure generated]"
     return str(result)
 
 
 def _exec_with_timeout(code: str, namespace: dict, timeout: int) -> None:
     """Run exec() in a thread with a timeout."""
-    exc_holder: list[Exception] = []
+    exc_holder: list[BaseException] = []
 
     def _target():
         try:
             exec(compile(code, "<generated>", "exec"), {"__builtins__": __builtins__}, namespace)
-        except Exception as exc:
+        except BaseException as exc:
             exc_holder.append(exc)
 
     thread = threading.Thread(target=_target, daemon=True)
@@ -101,6 +114,11 @@ def execute_code(code: str, df: pd.DataFrame) -> tuple[Any, str]:
     Returns (result_object, formatted_result_string).
     Raises CodeExecutionError on failure.
     """
+    if not code or not code.strip():
+        raise CodeExecutionError("Generated code cannot be empty.", code or "")
+    if df is None:
+        raise CodeExecutionError("Input DataFrame cannot be None.", code)
+
     # Safety: block dangerous imports before execution
     _check_imports(code)
 
@@ -124,7 +142,7 @@ def execute_code(code: str, df: pd.DataFrame) -> tuple[Any, str]:
         _exec_with_timeout(code, namespace, EXECUTION_TIMEOUT)
     except (CodeExecutionError, ExecutionTimeoutError):
         raise
-    except Exception as exc:
+    except BaseException as exc:
         raise CodeExecutionError(str(exc), code) from exc
 
     # Capture matplotlib figure if one was created

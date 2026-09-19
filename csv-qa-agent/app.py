@@ -13,14 +13,17 @@ import json
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
 
 from code_executor import CodeExecutionError, execute_code
 from data_loader import build_schema_summary, load_dataset
 from llm_client import generate_code, get_model_info
 
-DEFAULT_DATASET = Path(__file__).parent / "sample_data" / "dataset.csv"
-DEFAULT_LOG = Path(__file__).parent / "outputs" / "qa_log.json"
+DEFAULT_DATASET = Path(__file__).resolve().parent / "sample_data" / "dataset.csv"
+DEFAULT_LOG = Path(__file__).resolve().parent / "outputs" / "qa_log.json"
 MAX_RETRIES = 1
+
 
 
 def load_log(log_path: Path) -> list[dict]:
@@ -152,8 +155,9 @@ def run_single(question: str, dataset_path: Path, log_path: Path, *, quiet: bool
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="CSV/Data Q&A Agent — ask plain-English questions, get computed answers."
+        description="CSV/Data Q&A Agent -- ask plain-English questions, get computed answers."
     )
+
     parser.add_argument(
         "--data",
         type=Path,

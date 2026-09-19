@@ -16,7 +16,8 @@ import pandas as pd
 import streamlit as st
 
 from code_executor import CodeExecutionError, execute_code
-from data_loader import build_schema_summary, load_dataset
+from data_loader import build_schema_summary, load_dataset, _parse_date_columns
+
 
 # ---------------------------------------------------------------------------
 # Page config & custom CSS
@@ -248,17 +249,13 @@ with st.sidebar:
                 df = None
 
             if df is not None:
-                # Auto-parse dates
-                for col in df.select_dtypes(include=["object"]).columns:
-                    if any(kw in col.lower() for kw in ("date", "time")):
-                        try:
-                            df[col] = pd.to_datetime(df[col], format="mixed")
-                        except (ValueError, TypeError):
-                            pass
+                df.columns = [str(c).lstrip("\ufeff").strip() for c in df.columns]
+                df = _parse_date_columns(df)
                 st.session_state.df = df
                 st.session_state.schema = build_schema_summary(df)
                 st.session_state.dataset_name = uploaded.name
                 st.success(f"Loaded **{uploaded.name}**")
+
         except Exception as e:
             st.error(f"Failed to load: {e}")
 
