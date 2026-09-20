@@ -31,8 +31,16 @@ from prompts import RETRY_PROMPT, SYSTEM_PROMPT, build_user_message
 
 CODE_BLOCK_PATTERN = re.compile(r"```[a-zA-Z0-9_-]*\s*\n?(.*?)```", re.DOTALL)
 
-DEFAULT_GROQ_MODEL = "llama-3.3-70b-versatile"
+DEFAULT_GROQ_MODEL = "openai/gpt-oss-20b"
 DEFAULT_ANTHROPIC_MODEL = "claude-sonnet-4-20250514"
+
+GROQ_MODEL_FALLBACKS = [
+    "openai/gpt-oss-20b",
+    "openai/gpt-oss-120b",
+    "qwen/qwen3.6-27b",
+    "llama-3.3-70b-versatile",
+    "llama-3.1-8b-instant",
+]
 
 REQUEST_TIMEOUT = 30  # seconds
 
@@ -84,7 +92,7 @@ def _default_model(provider: str) -> str:
 
 
 def _call_groq(system: str, user_content: str, model: str) -> str:
-    """Call the Groq API."""
+    """Call the Groq API with automatic fallback if a model is deprecated/unavailable."""
     from groq import Groq
 
     api_key = os.getenv("GROQ_API_KEY")
@@ -92,16 +100,33 @@ def _call_groq(system: str, user_content: str, model: str) -> str:
         raise EnvironmentError("GROQ_API_KEY not set.")
 
     client = Groq(api_key=api_key, timeout=REQUEST_TIMEOUT)
-    response = client.chat.completions.create(
-        model=model,
-        max_tokens=2048,
-        temperature=0,
-        messages=[
-            {"role": "system", "content": system},
-            {"role": "user", "content": user_content},
-        ],
-    )
-    return response.choices[0].message.content or ""
+
+    # Sequence of models to attempt: requested model first, then known fallbacks
+    models_to_try = [model] + [m for m in GROQ_MODEL_FALLBACKS if m != model]
+    last_error = None
+
+    for m in models_to_try:
+        try:
+            response = client.chat.completions.create(
+                model=m,
+                max_tokens=2048,
+                temperature=0,
+                messages=[
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": user_content},
+                ],
+            )
+            return response.choices[0].message.content or ""
+        except Exception as exc:
+            err_msg = str(exc).lower()
+            if "model_not_found" in err_msg or "does not exist" in err_msg or "404" in err_msg:
+                last_error = exc
+                continue
+            raise exc
+
+    if last_error:
+        raise last_error
+    return ""
 
 
 def _call_anthropic(system: str, user_content: str, model: str) -> str:

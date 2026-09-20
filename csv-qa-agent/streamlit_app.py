@@ -282,21 +282,43 @@ with st.sidebar:
     # API Configuration
     st.divider()
     st.markdown("### 🔑 API Configuration")
-    api_key_input = st.text_input(
-        "Groq API Key",
-        value=os.getenv("GROQ_API_KEY", ""),
-        type="password",
-        placeholder="gsk_...",
-        help="Get a free Groq key at console.groq.com. Or add GROQ_API_KEY in Streamlit Cloud Secrets.",
+
+    has_configured_key = bool(
+        (hasattr(st, "secrets") and ("GROQ_API_KEY" in st.secrets or "ANTHROPIC_API_KEY" in st.secrets))
+        or os.getenv("GROQ_API_KEY")
+        or os.getenv("ANTHROPIC_API_KEY")
     )
-    if api_key_input:
-        os.environ["GROQ_API_KEY"] = api_key_input.strip()
+
+    if has_configured_key:
+        st.success("🔒 **API Key Loaded Securely**")
+        st.caption("Active from Streamlit Secrets / Environment.")
+        with st.expander("⚙️ Override Key (Optional)", expanded=False):
+            override_key = st.text_input(
+                "Temporary Override Key",
+                type="password",
+                placeholder="Paste another key to override...",
+                help="Your secret key is securely active. Enter a key here only if you wish to override it.",
+                key="override_key_field"
+            )
+            if override_key.strip():
+                os.environ["GROQ_API_KEY"] = override_key.strip()
+    else:
+        api_key_input = st.text_input(
+            "Groq API Key",
+            type="password",
+            placeholder="gsk_...",
+            help="Get a free Groq key at console.groq.com. Or add GROQ_API_KEY in Streamlit Cloud Secrets.",
+            key="manual_key_field"
+        )
+        if api_key_input.strip():
+            os.environ["GROQ_API_KEY"] = api_key_input.strip()
+            st.success("✅ Key active for this session")
+        else:
+            st.warning("⚠️ No key set. Paste your Groq key above or add to Streamlit Secrets.")
 
     info = _get_model_info()
     if info["provider"] != "none":
-        st.success(f"Connected: **{info['provider'].title()}** (`{info['model']}`)")
-    else:
-        st.warning("⚠️ No key set. Paste your Groq key above or add to Streamlit Secrets.")
+        st.caption(f"Provider: **{info['provider'].title()}** (`{info['model']}`)")
 
     # History
     st.divider()
