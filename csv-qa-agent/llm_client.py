@@ -16,13 +16,22 @@ try:
 except (ImportError, Exception):
     pass
 
+# Try loading from streamlit secrets if in a Streamlit context
+try:
+    import streamlit as st
+    for _k in ("GROQ_API_KEY", "ANTHROPIC_API_KEY", "LLM_PROVIDER", "GROQ_MODEL", "ANTHROPIC_MODEL"):
+        if hasattr(st, "secrets") and _k in st.secrets and not os.getenv(_k):
+            os.environ[_k] = str(st.secrets[_k])
+except Exception:
+    pass
+
 from prompts import RETRY_PROMPT, SYSTEM_PROMPT, build_user_message
 
 
 
 CODE_BLOCK_PATTERN = re.compile(r"```[a-zA-Z0-9_-]*\s*\n?(.*?)```", re.DOTALL)
 
-DEFAULT_GROQ_MODEL = "openai/gpt-oss-20b"
+DEFAULT_GROQ_MODEL = "llama-3.3-70b-versatile"
 DEFAULT_ANTHROPIC_MODEL = "claude-sonnet-4-20250514"
 
 REQUEST_TIMEOUT = 30  # seconds
@@ -63,7 +72,7 @@ def _provider() -> str:
     if os.getenv("ANTHROPIC_API_KEY"):
         return "anthropic"
     raise EnvironmentError(
-        "No API key found. Set GROQ_API_KEY or ANTHROPIC_API_KEY in .env"
+        "No API key found. Enter your GROQ_API_KEY in the sidebar or set GROQ_API_KEY in Streamlit Cloud Secrets / .env"
     )
 
 

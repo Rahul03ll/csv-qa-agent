@@ -8,12 +8,21 @@ Premium dark-mode interface with:
 - Chart rendering support
 """
 
+import os
 import json
 from datetime import datetime, timezone
 from pathlib import Path
 
 import pandas as pd
 import streamlit as st
+
+# Load Streamlit Cloud secrets into os.environ if available
+try:
+    for _k in ("GROQ_API_KEY", "ANTHROPIC_API_KEY", "LLM_PROVIDER", "GROQ_MODEL", "ANTHROPIC_MODEL"):
+        if hasattr(st, "secrets") and _k in st.secrets and not os.getenv(_k):
+            os.environ[_k] = str(st.secrets[_k])
+except Exception:
+    pass
 
 from code_executor import CodeExecutionError, execute_code
 from data_loader import build_schema_summary, load_dataset, _parse_date_columns
@@ -270,12 +279,24 @@ with st.sidebar:
         st.session_state.dataset_name = DEFAULT_DATASET.name
         st.success(f"Loaded **{DEFAULT_DATASET.name}**")
 
-    # Model info
+    # API Configuration
     st.divider()
-    st.markdown("### 🤖 Model")
+    st.markdown("### 🔑 API Configuration")
+    api_key_input = st.text_input(
+        "Groq API Key",
+        value=os.getenv("GROQ_API_KEY", ""),
+        type="password",
+        placeholder="gsk_...",
+        help="Get a free Groq key at console.groq.com. Or add GROQ_API_KEY in Streamlit Cloud Secrets.",
+    )
+    if api_key_input:
+        os.environ["GROQ_API_KEY"] = api_key_input.strip()
+
     info = _get_model_info()
-    st.markdown(f"**Provider:** `{info['provider']}`")
-    st.markdown(f"**Model:** `{info['model']}`")
+    if info["provider"] != "none":
+        st.success(f"Connected: **{info['provider'].title()}** (`{info['model']}`)")
+    else:
+        st.warning("⚠️ No key set. Paste your Groq key above or add to Streamlit Secrets.")
 
     # History
     st.divider()
@@ -331,7 +352,17 @@ if st.session_state.df is not None:
         st.code(st.session_state.schema, language="text")
 
     with tab_stats:
-        st.dataframe(df.describe(include="all").T, use_container_width=True)
+        try:
+            numeric_df = df.select_dtypes(include="number")
+            if not numeric_df.empty:
+                st.markdown("##### 🔢 Numeric Summary")
+                st.dataframe(numeric_df.describe().T, use_container_width=True)
+            categorical_df = df.select_dtypes(exclude="number")
+            if not categorical_df.empty:
+                st.markdown("##### 🔤 Categorical & Date Summary")
+                st.dataframe(categorical_df.describe().astype(str).T, use_container_width=True)
+        except Exception:
+            st.dataframe(df.describe(include="all").astype(str).T, use_container_width=True)
 
     st.divider()
 
@@ -352,6 +383,23 @@ if st.session_state.df is not None:
         st.session_state.messages.append({"role": "user", "content": question})
         with st.chat_message("user", avatar="🧑‍💻"):
             st.markdown(question)
+
+        # Check API key before making LLM request
+        has_key = bool(os.getenv("GROQ_API_KEY") or os.getenv("ANTHROPIC_API_KEY"))
+        if not has_key:
+            error_msg = (
+                "⚠️ **API Key Required**\n\n"
+                "Please enter your **Groq API Key** in the sidebar on the left (`🔑 API Configuration`), "
+                "or configure `GROQ_API_KEY` in your Streamlit Cloud **App Settings → Secrets**.\n\n"
+                "👉 *You can get a free, high-speed API key at [console.groq.com](https://console.groq.com).*"
+            )
+            with st.chat_message("assistant", avatar="🤖"):
+                st.warning(error_msg)
+            st.session_state.messages.append({
+                "role": "assistant",
+                "content": error_msg,
+            })
+            st.stop()
 
         # Generate and execute
         with st.chat_message("assistant", avatar="🤖"):
